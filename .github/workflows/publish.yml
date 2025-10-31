@@ -12,6 +12,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Needed for NPM provenance via OIDC
     steps:
       - uses: actions/checkout@v4
 
@@ -40,10 +43,8 @@ jobs:
         run: npm test
         continue-on-error: true
 
-      - name: Publish to NPM
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to NPM with provenance
+        run: npm publish --access public --provenance
 
       - name: Create GitHub Release (if manual)
         if: github.event_name == 'workflow_dispatch'

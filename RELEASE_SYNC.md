@@ -9,9 +9,10 @@ This NPM package automatically syncs with the main Tokligence Gateway releases.
 The repository includes a GitHub Actions workflow that automatically checks for new releases.
 
 #### Setup
-1. Add NPM token to GitHub Secrets:
-   - Go to Settings → Secrets → Actions
-   - Add `NPM_TOKEN` with your NPM automation token
+1. Configure NPM trusted publisher:
+   - Go to https://www.npmjs.com/package/@tokligence/gateway/access
+   - Add `tokligence/tokligence-gateway-npm` as trusted GitHub repository
+   - No tokens needed - uses GitHub OIDC!
 
 2. The workflow runs:
    - **Automatically**: Every hour (via cron schedule)
@@ -161,16 +162,17 @@ If the build suffix cannot be extracted automatically:
 ### NPM Publish Failed
 
 Common issues:
-1. **Authentication**: Ensure NPM_TOKEN is set in GitHub Secrets
+1. **Authentication**: Ensure GitHub repo is added as trusted publisher on NPM
 2. **Version conflict**: Version might already exist on NPM
-3. **Network issues**: Retry the workflow
+3. **OIDC setup**: Check https://www.npmjs.com/package/@tokligence/gateway/access
+4. **Network issues**: Retry the workflow
 
 ### GitHub Actions Not Running
 
 Check:
 1. Workflow file exists: `.github/workflows/sync-release.yml`
 2. Actions are enabled in repository settings
-3. NPM_TOKEN secret is configured
+3. NPM trusted publisher is configured (no tokens needed with OIDC!)
 
 ## 📊 Release History
 
@@ -189,9 +191,10 @@ git tag -l
 
 ## 🔐 Security
 
-- NPM_TOKEN should use automation token (not personal)
-- Use GitHub's built-in GITHUB_TOKEN for repository operations
-- Limit token permissions to minimum required
+- Uses GitHub OIDC - no tokens stored anywhere!
+- Temporary tokens generated per workflow run
+- Cryptographic provenance for all publishes
+- GitHub's built-in GITHUB_TOKEN for repository operations
 
 ## 📝 Best Practices
 
