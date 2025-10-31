@@ -75,3 +75,6 @@ temp/
 # Build outputs
 dist/
 build/
+
+# Local configuration
+config/
