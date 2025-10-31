@@ -1,0 +1,126 @@
+name: Sync with Gateway Release
+
+on:
+  schedule:
+    # Check for new releases every hour
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Gateway version to sync (e.g., 0.3.0)'
+        required: false
+
+jobs:
+  check-and-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Check for new Gateway release
+        id: check
+        run: |
+          # Get latest release from main repo
+          LATEST_RELEASE=$(gh api repos/tokligence/tokligence-gateway/releases/latest --jq '.tag_name' || echo "")
+
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').tokligenceGateway.version")
+
+          echo "Latest Gateway release: $LATEST_RELEASE"
+          echo "Current NPM package tracks: v$CURRENT_VERSION"
+
+          # Compare versions (remove 'v' prefix)
+          LATEST_VERSION=${LATEST_RELEASE#v}
+
+          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
+            echo "New version available: $LATEST_VERSION"
+            echo "new_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+            echo "has_update=true" >> $GITHUB_OUTPUT
+
+            # Get the binary name pattern to extract build suffix
+            BINARY_NAME=$(gh api repos/tokligence/tokligence-gateway/releases/latest \
+              --jq '.assets[0].name' | grep -E "gateway-v.*-linux-amd64" || echo "")
+
+            # Extract build suffix (e.g., -3-ge092ec5)
+            if [[ $BINARY_NAME =~ gateway-v${LATEST_VERSION}(.*)-linux-amd64 ]]; then
+              BUILD_SUFFIX="${BASH_REMATCH[1]}"
+              echo "Build suffix: $BUILD_SUFFIX"
+              echo "build_suffix=$BUILD_SUFFIX" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "No update needed"
+            echo "has_update=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update package.json
+        if: steps.check.outputs.has_update == 'true'
+        run: |
+          VERSION="${{ steps.check.outputs.new_version }}"
+          BUILD_SUFFIX="${{ steps.check.outputs.build_suffix }}"
+
+          # Update package.json
+          node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.version = '$VERSION';
+          pkg.tokligenceGateway.version = '$VERSION';
+          pkg.tokligenceGateway.buildSuffix = '$BUILD_SUFFIX';
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\\n');
+          "
+
+          echo "Updated package.json to version $VERSION"
+
+      - name: Install and test
+        if: steps.check.outputs.has_update == 'true'
+        run: |
+          npm ci
+          npm test
+
+      - name: Commit changes
+        if: steps.check.outputs.has_update == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          git add package.json
+          git commit -m "chore: sync with gateway release v${{ steps.check.outputs.new_version }}"
+          git push
+
+      - name: Publish to NPM
+        if: steps.check.outputs.has_update == 'true'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.has_update == 'true'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.check.outputs.new_version }}
+          release_name: Release v${{ steps.check.outputs.new_version }}
+          body: |
+            ## 🔄 Automated sync with Tokligence Gateway v${{ steps.check.outputs.new_version }}
+
+            This release automatically syncs with [tokligence-gateway v${{ steps.check.outputs.new_version }}](https://github.com/tokligence/tokligence-gateway/releases/tag/v${{ steps.check.outputs.new_version }})
+
+            ### Installation
+            ```bash
+            npm install -g @tokligence/gateway@${{ steps.check.outputs.new_version }}
+            ```
+
+            ### Changes
+            - Updated to gateway v${{ steps.check.outputs.new_version }}
+            - Build suffix: `${{ steps.check.outputs.build_suffix }}`
+          draft: false
+          prerelease: false

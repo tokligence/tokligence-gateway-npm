@@ -11,7 +11,9 @@
   "scripts": {
     "postinstall": "node scripts/postinstall.js",
     "preuninstall": "node scripts/preuninstall.js",
-    "test": "node test/test.js"
+    "test": "node test/test.js",
+    "sync": "node scripts/sync-release.js",
+    "sync:dry": "node scripts/sync-release.js --dry-run"
   },
   "files": [
     "bin/",
