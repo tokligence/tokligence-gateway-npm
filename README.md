@@ -2,7 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/@tokligence%2Fgateway.svg)](https://www.npmjs.com/package/@tokligence/gateway)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Node.js CI](https://github.com/tokligence/tokligence-gateway-npm/actions/workflows/ci.yml/badge.svg)](https://github.com/tokligence/tokligence-gateway-npm/actions)
+[![Sync Release](https://github.com/tokligence/tokligence-gateway-npm/actions/workflows/sync-release.yml/badge.svg)](https://github.com/tokligence/tokligence-gateway-npm/actions/workflows/sync-release.yml)
 
 Node.js wrapper for [Tokligence Gateway](https://github.com/tokligence/tokligence-gateway) - A unified API gateway for multiple LLM providers (OpenAI, Anthropic, Google AI, and more).
 

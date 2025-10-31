@@ -13,11 +13,19 @@ OIDC allows GitHub Actions to authenticate with NPM directly without storing any
 1. Go to your NPM package settings:
    https://www.npmjs.com/package/@tokligence/gateway/access
 
-2. Under "Publishing access", you should see GitHub Actions option
+2. Under "Publishing access", find the GitHub Actions section
 
-3. Add the GitHub repository:
+3. Add trusted publisher - you need TWO entries:
+
+   **For automatic sync (main workflow):**
    - Repository: `tokligence/tokligence-gateway-npm`
-   - Environment: Leave empty (or specify if using environments)
+   - Workflow filename: `sync-release.yml`
+   - Environment: (leave empty)
+
+   **For manual publish:**
+   - Repository: `tokligence/tokligence-gateway-npm`
+   - Workflow filename: `publish.yml`
+   - Environment: (leave empty)
 
 ### 2. Configure Package for Provenance
 
