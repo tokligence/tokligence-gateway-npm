@@ -1,0 +1,66 @@
+{
+  "name": "@tokligence/gateway",
+  "version": "0.2.0",
+  "description": "Multi-provider LLM Gateway - Unified API for OpenAI, Anthropic, Google AI and more",
+  "main": "lib/index.js",
+  "bin": {
+    "tokligence": "./bin/tokligence.js",
+    "tokligence-gateway": "./bin/gateway.js",
+    "tokligence-gatewayd": "./bin/gatewayd.js"
+  },
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js",
+    "preuninstall": "node scripts/preuninstall.js",
+    "test": "node test/test.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "scripts/",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "llm",
+    "gateway",
+    "openai",
+    "anthropic",
+    "google-ai",
+    "claude",
+    "gpt",
+    "api",
+    "proxy",
+    "ai"
+  ],
+  "author": "Tokligence Team",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tokligence/tokligence-gateway-npm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tokligence/tokligence-gateway-npm/issues"
+  },
+  "homepage": "https://github.com/tokligence/tokligence-gateway",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "chalk": "^4.1.2",
+    "commander": "^11.0.0",
+    "ora": "^5.4.1",
+    "tar": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "prettier": "^3.0.0"
+  },
+  "tokligenceGateway": {
+    "version": "0.2.0",
+    "buildSuffix": "-3-ge092ec5",
+    "binaryName": "gateway",
+    "daemonBinaryName": "gatewayd",
+    "repo": "tokligence/tokligence-gateway"
+  }
+}

@@ -1,0 +1,57 @@
+# Development files
+.github/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Source control
+.git/
+.gitignore
+
+# Test files
+test/
+coverage/
+.nyc_output/
+*.test.js
+*.spec.js
+
+# Documentation source files
+docs/
+*.md
+!README.md
+
+# Configuration files
+.eslintrc*
+.prettierrc*
+.editorconfig
+.npmignore
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+*.log
+
+# Build artifacts that shouldn't be published
+dist/
+build/
+
+# Local environment files
+.env
+.env.test
+.env.local
+
+# Package files
+*.tgz
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Examples (optional - you might want to include these)
+# examples/
+
+# Keep only essential files for npm package
+# The 'files' field in package.json is the authoritative list
