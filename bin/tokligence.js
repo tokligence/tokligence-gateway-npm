@@ -166,9 +166,4 @@ program
     }
   });
 
-// Show help if no command is provided
-if (!process.argv.slice(2).length) {
-  program.outputHelp();
-}
-
 program.parse(process.argv);
