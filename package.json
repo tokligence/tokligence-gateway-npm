@@ -1,12 +1,13 @@
 {
   "name": "@tokligence/gateway",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Multi-provider LLM Gateway - Unified API for OpenAI, Anthropic, Google AI and more",
   "main": "lib/index.js",
   "bin": {
     "tokligence": "./bin/tokligence.js",
-    "tokligence-gateway": "./bin/gateway.js",
-    "tokligence-gatewayd": "./bin/gatewayd.js"
+    "tgw": "./bin/tokligence.js",
+    "gateway": "./bin/gateway.js",
+    "gatewayd": "./bin/gatewayd.js"
   },
   "scripts": {
     "postinstall": "node scripts/postinstall.js",
@@ -59,7 +60,7 @@
     "prettier": "^3.0.0"
   },
   "tokligenceGateway": {
-    "version": "0.2.0",
+    "version": "0.2.1",
     "buildSuffix": "-3-ge092ec5",
     "binaryName": "gateway",
     "daemonBinaryName": "gatewayd",

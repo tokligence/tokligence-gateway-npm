@@ -42,14 +42,14 @@ pnpm add @tokligence/gateway
 
 ### CLI Usage
 
-After global installation, you can use the `tokligence` command:
+After global installation, you can use the `tokligence` command (or `tgw` as a shorthand):
 
 ```bash
 # Initialize configuration
-tokligence init
+tokligence init       # or: tgw init
 
 # Start the gateway server
-tokligence start
+tokligence start      # or: tgw start
 
 # Start on a different port
 tokligence start --port 3000
