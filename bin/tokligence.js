@@ -6,8 +6,11 @@ const ora = require('ora');
 const { Gateway } = require('../lib');
 const pkg = require('../package.json');
 
+const path = require('path');
+const scriptName = path.basename(process.argv[1], '.js');
+
 program
-  .name('tokligence')
+  .name(scriptName === 'tgw' ? 'tgw' : 'tokligence')
   .description('Tokligence Gateway CLI - Multi-provider LLM Gateway')
   .version(pkg.version);
 
