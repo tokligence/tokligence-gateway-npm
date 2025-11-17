@@ -101,6 +101,8 @@ jobs:
       - name: Publish to NPM with provenance
         if: steps.check.outputs.has_update == 'true'
         run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         if: steps.check.outputs.has_update == 'true'
