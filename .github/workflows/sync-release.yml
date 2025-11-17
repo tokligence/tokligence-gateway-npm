@@ -88,6 +88,17 @@ jobs:
           npm ci
           npm test
 
+      - name: Skip sync-docs in CI (already has synced docs)
+        if: steps.check.outputs.has_update == 'true'
+        run: |
+          # Remove prepublishOnly script temporarily to skip sync-docs
+          node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          delete pkg.scripts.prepublishOnly;
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
       - name: Publish to NPM with provenance
         if: steps.check.outputs.has_update == 'true'
         run: npm publish --access public --provenance
