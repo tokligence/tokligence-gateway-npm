@@ -203,4 +203,18 @@ program
     }
   });
 
+program
+  .command('chat')
+  .description('Interactive AI assistant for Tokligence Gateway configuration and help')
+  .option('-m, --model <model>', 'Preferred model to use')
+  .action(async (options) => {
+    try {
+      const { startChat } = require('../lib/chat');
+      await startChat(options);
+    } catch (error) {
+      console.error(chalk.red('Failed to start chat:'), error.message);
+      process.exit(1);
+    }
+  });
+
 program.parse(process.argv);

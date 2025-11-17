@@ -1,0 +1,14 @@
+{
+  "version": "0.3.0",
+  "commit": "3d931d78",
+  "syncedAt": "2025-11-17T17:25:27.068Z",
+  "files": {
+    "README.md": "5b12e0a20a5ae6ab8897c3224f4210d7"
+  },
+  "links": {
+    "github": "https://github.com/tokligence/tokligence-gateway",
+    "npm": "https://www.npmjs.com/package/@tokligence/gateway",
+    "website": "https://tokligence.ai",
+    "wiki": "https://github.com/tokligence/tokligence-gateway/wiki"
+  }
+}
