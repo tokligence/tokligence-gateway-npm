@@ -10,6 +10,7 @@ Node.js wrapper for [Tokligence Gateway](https://github.com/tokligence/tokligenc
 
 - 🚀 **Easy Installation**: Install via npm, automatically downloads the appropriate binary for your platform
 - 🔧 **CLI & API**: Use as a command-line tool or integrate programmatically with Node.js
+- 🤖 **AI Assistant**: Interactive chat assistant (`tgw chat`) to help with gateway configuration
 - 🌍 **Cross-Platform**: Supports macOS, Linux, and Windows (x64 and arm64)
 - 🔌 **Multiple Providers**: Unified interface for OpenAI, Anthropic, Google AI, and more
 - 🛡️ **Production Ready**: Rate limiting, logging, and monitoring built-in
@@ -62,7 +63,45 @@ tokligence logs
 
 # Stop the server
 tokligence stop
+
+# Interactive AI assistant for configuration help
+tokligence chat      # or: tgw chat
 ```
+
+### AI Assistant (`tgw chat`)
+
+Get help configuring and using the gateway with an interactive AI assistant:
+
+```bash
+tgw chat
+```
+
+The assistant automatically detects available LLM providers in this priority order:
+1. **Local LLMs** (free): Ollama, vLLM, LM Studio
+2. **Commercial APIs**: OpenAI, Anthropic, Google Gemini
+3. **Running Gateway** (if available)
+
+**Configuration for chat:**
+
+```bash
+# Local LLMs (recommended - free)
+# Ollama - auto-detected, just run: ollama serve
+
+# Or use commercial LLMs:
+export TOKLIGENCE_OPENAI_API_KEY=sk-...
+export TOKLIGENCE_ANTHROPIC_API_KEY=sk-ant-...
+export TOKLIGENCE_GOOGLE_API_KEY=AIza...
+
+# Custom OpenAI-compatible endpoint:
+export TOKLIGENCE_LLM_ENDPOINT=http://your-llm.com/v1
+export TOKLIGENCE_LLM_API_KEY=optional-key
+```
+
+The chat assistant can:
+- Answer questions about Tokligence Gateway
+- Help configure API keys and settings
+- Execute configuration commands via function calling
+- Provide troubleshooting guidance
 
 ### Programmatic Usage
 
@@ -99,9 +138,11 @@ await gateway.stop();
 Create a `.env` file in your project root:
 
 ```bash
-OPENAI_API_KEY=sk-...
-ANTHROPIC_API_KEY=sk-ant-...
-GOOGLE_API_KEY=...
+# Gateway configuration
+TOKLIGENCE_EMAIL=user@example.com
+TOKLIGENCE_OPENAI_API_KEY=sk-...
+TOKLIGENCE_ANTHROPIC_API_KEY=sk-ant-...
+TOKLIGENCE_GOOGLE_API_KEY=...
 ```
 
 ### Configuration File
@@ -112,25 +153,22 @@ Initialize a configuration file:
 tokligence init
 ```
 
-This creates `~/.tokligence/config.yaml`:
+This creates `~/.tokligence/config/settings.ini` and `~/.tokligence/config/dev/gateway.ini`:
 
-```yaml
-server:
-  port: 8080
-  host: localhost
+**settings.ini:**
+```ini
+# Tokligence Gateway Settings
+environment=dev
+```
 
-providers:
-  openai:
-    api_key: ${OPENAI_API_KEY}
-    base_url: https://api.openai.com/v1
-
-  anthropic:
-    api_key: ${ANTHROPIC_API_KEY}
-    base_url: https://api.anthropic.com
-
-  google:
-    api_key: ${GOOGLE_API_KEY}
-    base_url: https://generativelanguage.googleapis.com
+**dev/gateway.ini:**
+```ini
+# Tokligence Gateway Configuration
+openai_api_key=${TOKLIGENCE_OPENAI_API_KEY}
+email=${TOKLIGENCE_EMAIL:-cs@tokligence.ai}
+anthropic_api_key=${TOKLIGENCE_ANTHROPIC_API_KEY}
+google_api_key=${TOKLIGENCE_GOOGLE_API_KEY}
+port=8081
 ```
 
 ### Configuration Management
