@@ -17,11 +17,28 @@ program
 program
   .command('start')
   .description('Start Tokligence Gateway server')
-  .option('-p, --port <port>', 'Port to listen on', '8080')
+  .option('-p, --port <port>', 'Port to listen on', '8081')
   .option('-H, --host <host>', 'Host to bind to', 'localhost')
   .option('-c, --config <path>', 'Path to configuration file')
   .option('-d, --daemon', 'Run in daemon mode')
   .action(async (options) => {
+    // Check if API keys are configured
+    const hasEmail = process.env.TOKLIGENCE_EMAIL;
+    const hasOpenAI = process.env.TOKLIGENCE_OPENAI_API_KEY;
+    const hasAnthropic = process.env.TOKLIGENCE_ANTHROPIC_API_KEY;
+
+    if (!hasEmail) {
+      console.log(chalk.yellow('\n⚠️  TOKLIGENCE_EMAIL not set'));
+    }
+
+    if (!hasOpenAI && !hasAnthropic) {
+      console.log(chalk.yellow('⚠️  No API keys configured'));
+      console.log(chalk.gray('Gateway will run in loopback mode only.\n'));
+      console.log(chalk.gray('To enable providers, set:'));
+      console.log(chalk.gray('  export TOKLIGENCE_OPENAI_API_KEY=sk-...'));
+      console.log(chalk.gray('  export TOKLIGENCE_ANTHROPIC_API_KEY=sk-ant-...\n'));
+    }
+
     const spinner = ora('Starting Tokligence Gateway...').start();
 
     try {
@@ -42,7 +59,24 @@ program
       }
     } catch (error) {
       spinner.fail(chalk.red('Failed to start gateway'));
-      console.error(error.message);
+
+      console.error(chalk.yellow('\nReason:'), error.message);
+
+      if (error.message.includes('not responding')) {
+        console.log(chalk.cyan('\nPossible causes:'));
+        console.log('  1. Missing TOKLIGENCE_EMAIL environment variable');
+        console.log('  2. Port already in use');
+        console.log('  3. Configuration error');
+
+        console.log(chalk.cyan('\nDebug steps:'));
+        console.log('  1. Check logs:   ', chalk.white('tgw logs'));
+        console.log('  2. Check port:   ', chalk.white(`lsof -i :${options.port || 8081}`));
+        console.log('  3. Check process:', chalk.white('ps aux | grep gatewayd'));
+        console.log('  4. Check config: ', chalk.white('ls ~/.tokligence/config/'));
+      }
+
+      console.log(chalk.gray('\nFor more help: https://github.com/tokligence/tokligence-gateway-npm#troubleshooting'));
+
       process.exit(1);
     }
   });
