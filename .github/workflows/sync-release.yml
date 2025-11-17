@@ -88,6 +88,12 @@ jobs:
           npm ci
           npm test
 
+      - name: Publish to NPM with provenance
+        if: steps.check.outputs.has_update == 'true'
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Commit changes
         if: steps.check.outputs.has_update == 'true'
         run: |
@@ -97,12 +103,6 @@ jobs:
           git add package.json
           git commit -m "chore: sync with gateway release v${{ steps.check.outputs.new_version }}"
           git push
-
-      - name: Publish to NPM with provenance
-        if: steps.check.outputs.has_update == 'true'
-        run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         if: steps.check.outputs.has_update == 'true'
