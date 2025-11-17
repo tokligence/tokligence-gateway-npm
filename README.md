@@ -4,98 +4,202 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Sync Release](https://github.com/tokligence/tokligence-gateway-npm/actions/workflows/sync-release.yml/badge.svg)](https://github.com/tokligence/tokligence-gateway-npm/actions/workflows/sync-release.yml)
 
-Node.js wrapper for [Tokligence Gateway](https://github.com/tokligence/tokligence-gateway) - A unified API gateway for multiple LLM providers (OpenAI, Anthropic, Google AI, and more).
+**NPM installation for [Tokligence Gateway](https://github.com/tokligence/tokligence-gateway)** - The first open-source AI gateway with two-way token trading.
 
-## Features
+> **TL;DR**: Tokligence Gateway is a high-performance LLM gateway that provides unified access to multiple LLM providers (OpenAI, Anthropic, Google AI) with full bidirectional protocol translation. This NPM package automatically downloads and manages the native Go binaries for your platform.
 
-- 🚀 **Easy Installation**: Install via npm, automatically downloads the appropriate binary for your platform
-- 🔧 **CLI & API**: Use as a command-line tool or integrate programmatically with Node.js
-- 🤖 **AI Assistant**: Interactive chat assistant (`tgw chat`) to help with gateway configuration
-- 🌍 **Cross-Platform**: Supports macOS, Linux, and Windows (x64 and arm64)
-- 🔌 **Multiple Providers**: Unified interface for OpenAI, Anthropic, Google AI, and more
-- 🛡️ **Production Ready**: Rate limiting, logging, and monitoring built-in
+## What is Tokligence Gateway?
+
+Tokligence Gateway is a **platform-independent LLM gateway** that provides **dual native API support** - both OpenAI and Anthropic protocols - with full bidirectional translation. Unlike simple proxies, it offers:
+
+### Core Capabilities
+
+- **🔄 Bidirectional Protocol Translation**: OpenAI ↔ Anthropic with zero adapter overhead
+  - Use Claude models with OpenAI SDK (Codex CLI, LangChain)
+  - Use GPT models with Anthropic SDK (Claude Code)
+
+- **🤖 Multiple LLM Providers**: Unified interface for:
+  - OpenAI (GPT-4, GPT-3.5)
+  - Anthropic (Claude Sonnet 4.5, Opus, Haiku)
+  - Google AI (Gemini 2.5)
+  - Custom OpenAI-compatible endpoints
+
+- **💰 Token Trading Marketplace** (upcoming):
+  - Buy tokens to meet AI needs
+  - Sell unused LLM token capacity
+  - Democratized AI infrastructure
+
+- **📊 Built-in Token Ledger**: Track usage, audit trails, cost optimization
+
+- **🛡️ Production Ready**: Rate limiting, logging, monitoring, failover
+
+### Why Choose Tokligence Gateway?
+
+| Feature | Tokligence Gateway | LiteLLM | OpenRouter | Cloudflare AI Gateway |
+|---------|-------------------|---------|------------|----------------------|
+| **Bidirectional Translation** | OpenAI ↔ Anthropic | OpenAI-style only | OpenAI-style only | OpenAI-style only |
+| **Native Protocols** | Dual native APIs | Single proxy | Single endpoint | Normalizes to OpenAI |
+| **Client Compatibility** | OpenAI SDK + Anthropic SDK | OpenAI SDK | OpenAI SDK | OpenAI SDK |
+| **Token Marketplace** | ✅ Two-way trading | ❌ | ❌ | ❌ |
+| **Deployment** | Self-hosted (Docker, npm, pip, binary) | Self-hosted Python | Managed SaaS | Cloudflare platform |
+| **Performance** | Go binary, low overhead | Python runtime | Network hop | Edge optimized |
+| **Open Source** | Apache-2.0 | MIT | Closed | Closed |
 
 ## Installation
 
-### Global Installation (CLI)
+### Global Installation (Recommended)
+
+Install the CLI globally for easy access:
 
 ```bash
 npm install -g @tokligence/gateway
 ```
 
-### Local Installation (Project Dependency)
+After installation, you can use the `tokligence` command (or `tgw` as a shorthand):
+
+```bash
+tgw --version
+```
+
+### Local Installation
+
+Install as a project dependency:
 
 ```bash
 npm install @tokligence/gateway
-```
-
-Or with other package managers:
-
-```bash
-# yarn
+# or
 yarn add @tokligence/gateway
-
-# pnpm
+# or
 pnpm add @tokligence/gateway
 ```
 
 ## Quick Start
 
-### CLI Usage
+### 1. Initialize Configuration
 
-After global installation, you can use the `tokligence` command (or `tgw` as a shorthand):
+```bash
+tgw init
+```
+
+This creates `~/.tokligence/config/settings.ini` with default configuration.
+
+### 2. Configure API Keys
+
+Set your LLM provider API keys:
+
+```bash
+export TOKLIGENCE_EMAIL=your-email@example.com
+export TOKLIGENCE_OPENAI_API_KEY=sk-...
+export TOKLIGENCE_ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Or edit the config file directly:
+
+```bash
+tgw config set openai_api_key sk-...
+tgw config set anthropic_api_key sk-ant-...
+```
+
+### 3. Start the Gateway
+
+```bash
+# Start in daemon mode
+tgw start --daemon
+
+# Check status
+tgw status
+
+# View logs
+tgw logs -f
+```
+
+The gateway starts on `http://localhost:8081` by default.
+
+### 4. Use with Your LLM Clients
+
+#### OpenAI SDK → Anthropic Claude
+
+```python
+from openai import OpenAI
+
+# Point to Tokligence Gateway
+client = OpenAI(
+    base_url="http://localhost:8081/v1",
+    api_key="any-key"  # Gateway handles the actual API keys
+)
+
+# Use Claude models with OpenAI SDK!
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+```
+
+#### Anthropic SDK → OpenAI GPT
+
+```python
+from anthropic import Anthropic
+
+# Point to Tokligence Gateway
+client = Anthropic(
+    base_url="http://localhost:8081/anthropic",
+    api_key="any-key"
+)
+
+# Use GPT models with Anthropic SDK!
+response = client.messages.create(
+    model="gpt-4",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+```
+
+## CLI Commands
+
+### Gateway Management
 
 ```bash
 # Initialize configuration
-tokligence init       # or: tgw init
+tgw init
 
-# Start the gateway server
-tokligence start      # or: tgw start
+# Start the gateway
+tgw start [--port 8081] [--daemon]
 
-# Start on a different port
-tokligence start --port 3000
+# Stop the gateway
+tgw stop
 
 # Check status
-tokligence status
+tgw status
 
 # View logs
-tokligence logs
-
-# Stop the server
-tokligence stop
-
-# Interactive AI assistant for configuration help
-tokligence chat      # or: tgw chat
+tgw logs [-f] [-n 50]
 ```
 
-### AI Assistant (`tgw chat`)
+### Configuration Management
 
-Get help configuring and using the gateway with an interactive AI assistant:
+```bash
+# List all configuration
+tgw config list
+
+# Get a specific value
+tgw config get openai_api_key
+
+# Set a value
+tgw config set port 3000
+```
+
+### AI Assistant
+
+Get interactive help with an AI assistant:
 
 ```bash
 tgw chat
 ```
 
-The assistant automatically detects available LLM providers in this priority order:
+The assistant automatically detects available LLM providers:
 1. **Local LLMs** (free): Ollama, vLLM, LM Studio
 2. **Commercial APIs**: OpenAI, Anthropic, Google Gemini
 3. **Running Gateway** (if available)
-
-**Configuration for chat:**
-
-```bash
-# Local LLMs (recommended - free)
-# Ollama - auto-detected, just run: ollama serve
-
-# Or use commercial LLMs:
-export TOKLIGENCE_OPENAI_API_KEY=sk-...
-export TOKLIGENCE_ANTHROPIC_API_KEY=sk-ant-...
-export TOKLIGENCE_GOOGLE_API_KEY=AIza...
-
-# Custom OpenAI-compatible endpoint:
-export TOKLIGENCE_LLM_ENDPOINT=http://your-llm.com/v1
-export TOKLIGENCE_LLM_API_KEY=optional-key
-```
 
 The chat assistant can:
 - Answer questions about Tokligence Gateway
@@ -103,280 +207,241 @@ The chat assistant can:
 - Execute configuration commands via function calling
 - Provide troubleshooting guidance
 
-### Programmatic Usage
+## Real-World Use Cases
+
+### 1. Use Claude with Codex CLI
+
+[Codex CLI](https://github.com/openai/codex-cli) only supports OpenAI API. Use Tokligence Gateway to access Claude models:
+
+```bash
+# Start gateway
+tgw start --daemon
+
+# Configure Codex to use gateway
+export OPENAI_API_BASE=http://localhost:8081/v1
+
+# Use Claude models with Codex!
+codex --model claude-sonnet-4-5-20250929 "Write a Python function"
+```
+
+### 2. Use GPT with Claude Code
+
+[Claude Code](https://claude.ai/download) only supports Anthropic API. Use Tokligence Gateway to access GPT models:
+
+```bash
+# Start gateway
+tgw start --daemon
+
+# Point Claude Code to gateway
+# In Claude Code settings, set:
+# Base URL: http://localhost:8081/anthropic
+
+# Now you can use GPT models in Claude Code!
+```
+
+### 3. Multi-Provider Cost Optimization
+
+Route requests to the most cost-effective provider:
+
+```bash
+# Configure routing in ~/.tokligence/config/dev/gateway.ini
+# Route expensive tasks to cheaper models
+model_provider_routes=gpt-4→claude-sonnet,gpt-3.5→claude-haiku
+```
+
+### 4. Privacy and Self-Hosting
+
+Keep sensitive data on your infrastructure:
+
+```bash
+# Use with local LLMs via Ollama
+export TOKLIGENCE_LLM_ENDPOINT=http://localhost:11434/v1
+tgw start --daemon
+
+# All requests stay local!
+```
+
+## Programmatic Usage (Node.js)
+
+While primarily a CLI tool, you can also use it programmatically:
 
 ```javascript
 const { Gateway } = require('@tokligence/gateway');
 
-// Create a gateway instance
-const gateway = new Gateway({
-  port: 8080,
-  host: 'localhost'
-});
+async function main() {
+  const gateway = new Gateway({
+    port: 8081,
+    daemon: true
+  });
 
-// Start the server
-await gateway.start();
+  // Start the gateway
+  await gateway.start();
+  console.log('Gateway started!');
 
-// Make API calls
-const response = await gateway.chat({
-  model: 'gpt-4',
-  messages: [
-    { role: 'user', content: 'Hello, how are you?' }
-  ]
-});
+  // Check status
+  const status = await gateway.status();
+  console.log('Status:', status);
 
-console.log(response);
+  // Stop the gateway (when done)
+  // await gateway.stop();
+}
 
-// Stop the server
-await gateway.stop();
+main().catch(console.error);
 ```
+
+## Platform Support
+
+This package automatically downloads the appropriate binary for your platform:
+
+- **macOS**: Intel (x64) and Apple Silicon (arm64)
+- **Linux**: x64 and ARM64
+- **Windows**: x64
+
+Binaries are downloaded from [GitHub Releases](https://github.com/tokligence/tokligence-gateway/releases) during installation.
 
 ## Configuration
 
 ### Environment Variables
 
-Create a `.env` file in your project root:
-
 ```bash
-# Gateway configuration
-TOKLIGENCE_EMAIL=user@example.com
+# Required
+TOKLIGENCE_EMAIL=your-email@example.com
+
+# LLM Provider API Keys
 TOKLIGENCE_OPENAI_API_KEY=sk-...
 TOKLIGENCE_ANTHROPIC_API_KEY=sk-ant-...
-TOKLIGENCE_GOOGLE_API_KEY=...
+TOKLIGENCE_GOOGLE_API_KEY=AIza...
+
+# Optional: Custom OpenAI-compatible endpoint
+TOKLIGENCE_LLM_ENDPOINT=http://your-llm.com/v1
+TOKLIGENCE_LLM_API_KEY=optional-key
+
+# Chat assistant configuration
+TOKLIGENCE_OPENAI_API_KEY=sk-...      # For chat assistant
+TOKLIGENCE_ANTHROPIC_API_KEY=sk-ant-... # For chat assistant
 ```
 
-### Configuration File
+### Configuration Files
 
-Initialize a configuration file:
+After running `tgw init`, configuration is stored in:
+
+- `~/.tokligence/config/settings.ini` - Environment settings
+- `~/.tokligence/config/dev/gateway.ini` - Gateway configuration
+
+Edit these files directly or use `tgw config set <key> <value>`.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     Your Application                             │
+│  (OpenAI SDK, Anthropic SDK, Codex CLI, Claude Code)           │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  Tokligence Gateway (Port 8081)                  │
+│                                                                   │
+│  ┌──────────────────┐    ┌──────────────────┐                  │
+│  │  OpenAI API      │    │  Anthropic API   │                  │
+│  │  /v1/chat/...    │◄──►│  /v1/messages    │                  │
+│  └────────┬─────────┘    └─────────┬────────┘                  │
+│           │                         │                            │
+│           └────────┬───────────────┘                            │
+│                    │                                             │
+│           ┌────────▼─────────┐                                  │
+│           │  Protocol        │                                  │
+│           │  Translator      │                                  │
+│           │  (Bidirectional) │                                  │
+│           └────────┬─────────┘                                  │
+│                    │                                             │
+│           ┌────────▼─────────┐                                  │
+│           │  Model Router    │                                  │
+│           │  & Load Balancer │                                  │
+│           └────────┬─────────┘                                  │
+│                    │                                             │
+│           ┌────────▼─────────┐                                  │
+│           │  Token Ledger    │                                  │
+│           │  & Accounting    │                                  │
+│           └──────────────────┘                                  │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+         ┌───────────────┼───────────────┐
+         ▼               ▼               ▼
+    ┌─────────┐    ┌──────────┐    ┌─────────┐
+    │ OpenAI  │    │ Anthropic│    │ Google  │
+    │   API   │    │   API    │    │   AI    │
+    └─────────┘    └──────────┘    └─────────┘
+```
+
+## Advanced Features
+
+### Work Modes
+
+Configure how the gateway handles requests:
 
 ```bash
-tokligence init
+# Auto mode (default): Smart routing based on model
+tgw config set work_mode auto
+
+# Passthrough: Direct delegation to provider
+tgw config set work_mode passthrough
+
+# Translation: Force protocol translation
+tgw config set work_mode translation
 ```
 
-This creates `~/.tokligence/config/settings.ini` and `~/.tokligence/config/dev/gateway.ini`:
+### Model Routing
 
-**settings.ini:**
+Route specific models to specific providers:
+
 ```ini
-# Tokligence Gateway Settings
-environment=dev
+# In ~/.tokligence/config/dev/gateway.ini
+model_provider_routes=gpt*→openai,claude*→anthropic
 ```
 
-**dev/gateway.ini:**
-```ini
-# Tokligence Gateway Configuration
-openai_api_key=${TOKLIGENCE_OPENAI_API_KEY}
-email=${TOKLIGENCE_EMAIL:-cs@tokligence.ai}
-anthropic_api_key=${TOKLIGENCE_ANTHROPIC_API_KEY}
-google_api_key=${TOKLIGENCE_GOOGLE_API_KEY}
-port=8081
-```
+### Token Accounting
 
-### Configuration Management
+View token usage:
 
 ```bash
-# Get a configuration value
-tokligence config get server.port
-
-# Set a configuration value
-tokligence config set server.port 3000
-
-# List all configuration
-tokligence config list
-```
-
-## API Reference
-
-### Gateway Class
-
-```javascript
-const { Gateway } = require('@tokligence/gateway');
-```
-
-#### Constructor
-
-```javascript
-new Gateway(options)
-```
-
-Options:
-- `port` (number): Server port (default: 8080)
-- `host` (string): Server host (default: 'localhost')
-- `config` (string): Path to configuration file
-- `daemon` (boolean): Run in daemon mode
-
-#### Methods
-
-##### `start()`
-
-Start the gateway server.
-
-```javascript
-await gateway.start();
-```
-
-##### `stop()`
-
-Stop the gateway server.
-
-```javascript
-await gateway.stop();
-```
-
-##### `status()`
-
-Get server status.
-
-```javascript
-const status = await gateway.status();
-// { running: true, pid: 12345, port: 8080, uptime: '2h 30m' }
-```
-
-##### `chat(options)`
-
-Make a chat completion request.
-
-```javascript
-const response = await gateway.chat({
-  model: 'gpt-4',
-  messages: [
-    { role: 'system', content: 'You are a helpful assistant.' },
-    { role: 'user', content: 'Hello!' }
-  ]
-});
-```
-
-##### `listModels()`
-
-List available models.
-
-```javascript
-const models = await gateway.listModels();
-```
-
-## Integration Examples
-
-### Express.js Integration
-
-```javascript
-const express = require('express');
-const { Gateway } = require('@tokligence/gateway');
-
-const app = express();
-const gateway = new Gateway({ port: 8081 });
-
-app.get('/api/chat', async (req, res) => {
-  try {
-    const response = await gateway.chat({
-      model: req.query.model || 'gpt-3.5-turbo',
-      messages: req.body.messages
-    });
-    res.json(response);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Start both servers
-gateway.start().then(() => {
-  app.listen(3000, () => {
-    console.log('API server running on port 3000');
-    console.log('Gateway running on port 8081');
-  });
-});
-```
-
-### Next.js API Route
-
-```javascript
-// pages/api/chat.js
-import { Gateway } from '@tokligence/gateway';
-
-const gateway = new Gateway();
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  try {
-    // Ensure gateway is running
-    if (!(await gateway.isRunning())) {
-      await gateway.start();
-    }
-
-    const response = await gateway.chat(req.body);
-    res.status(200).json(response);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
-```
-
-### Using with OpenAI SDK
-
-```javascript
-const OpenAI = require('openai');
-const { Gateway } = require('@tokligence/gateway');
-
-// Start the gateway
-const gateway = new Gateway({ port: 8080 });
-await gateway.start();
-
-// Use OpenAI SDK with gateway endpoint
-const openai = new OpenAI({
-  baseURL: 'http://localhost:8080/v1',
-  apiKey: 'any-key' // Gateway handles the actual API keys
-});
-
-const completion = await openai.chat.completions.create({
-  model: 'gpt-4',
-  messages: [{ role: 'user', content: 'Hello!' }]
-});
-```
-
-## Direct Binary Access
-
-If you need to run the Go binaries directly:
-
-```bash
-# Run gateway binary directly
-npx tokligence-gateway --help
-
-# Run daemon binary directly
-npx tokligence-gatewayd --help
+# Check ledger database
+sqlite3 ~/.tokligence/ledger.db "SELECT * FROM usage_log LIMIT 10;"
 ```
 
 ## Troubleshooting
 
 ### Binary Download Issues
 
-If the automatic binary download fails during installation:
+If automatic binary download fails:
 
 1. Check your internet connection
 2. Verify GitHub is accessible
 3. Manually download from [GitHub Releases](https://github.com/tokligence/tokligence-gateway/releases)
 4. Place binaries in `node_modules/@tokligence/gateway/.bin/`
 
-### Platform Support
-
-Supported platforms:
-- macOS (Intel & Apple Silicon)
-- Linux (x64 & ARM64)
-- Windows (x64)
-
-### Logs
-
-View gateway logs:
+### Gateway Won't Start
 
 ```bash
-# View last 50 lines
-tokligence logs -n 50
+# Check if port is in use
+lsof -i :8081
 
-# Follow logs in real-time
-tokligence logs -f
+# Check logs
+tgw logs -n 100
+
+# Verify configuration
+tgw config list
 ```
 
-Default log location: `~/.tokligence/gateway.log`
+### Protocol Translation Issues
+
+```bash
+# Enable debug logging
+tgw config set log_level debug
+
+# Check translation logs
+tgw logs -f | grep translation
+```
 
 ## Development
 
@@ -395,6 +460,14 @@ npm link
 npm test
 ```
 
+## Documentation
+
+- **Main Repository**: [tokligence/tokligence-gateway](https://github.com/tokligence/tokligence-gateway)
+- **Quick Start Guide**: [docs/QUICK_START.md](https://github.com/tokligence/tokligence-gateway/blob/main/docs/QUICK_START.md)
+- **Codex Integration**: [docs/codex-to-anthropic.md](https://github.com/tokligence/tokligence-gateway/blob/main/docs/codex-to-anthropic.md)
+- **Claude Code Integration**: [docs/claude_code-to-openai.md](https://github.com/tokligence/tokligence-gateway/blob/main/docs/claude_code-to-openai.md)
+- **Features Documentation**: [docs/features.md](https://github.com/tokligence/tokligence-gateway/blob/main/docs/features.md)
+
 ## Contributing
 
 Contributions are welcome! Please read our [Contributing Guide](https://github.com/tokligence/tokligence-gateway-npm/blob/main/CONTRIBUTING.md) for details.
@@ -405,13 +478,18 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## Links
 
-- [Main Repository](https://github.com/tokligence/tokligence-gateway)
-- [NPM Package](https://www.npmjs.com/package/@tokligence/gateway)
-- [Documentation](https://github.com/tokligence/tokligence-gateway/wiki)
-- [Issues](https://github.com/tokligence/tokligence-gateway-npm/issues)
+- **NPM Package**: https://www.npmjs.com/package/@tokligence/gateway
+- **Main Repository**: https://github.com/tokligence/tokligence-gateway
+- **NPM Wrapper Repository**: https://github.com/tokligence/tokligence-gateway-npm
+- **Issues**: https://github.com/tokligence/tokligence-gateway-npm/issues
+- **Website**: https://tokligence.ai
 
 ## Support
 
 For issues and questions:
 - NPM package issues: [GitHub Issues](https://github.com/tokligence/tokligence-gateway-npm/issues)
-- Gateway issues: [Main Repo Issues](https://github.com/tokligence/tokligence-gateway/issues)
+- Gateway core issues: [Main Repo Issues](https://github.com/tokligence/tokligence-gateway/issues)
+
+---
+
+**Built with ❤️ by the Tokligence team**
