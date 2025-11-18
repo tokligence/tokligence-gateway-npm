@@ -207,6 +207,17 @@ The chat assistant can:
 - Execute configuration commands via function calling
 - Provide troubleshooting guidance
 
+Example `tgw chat` session (interactive configuration assistant):
+
+![Tokligence Gateway CLI Chat](data/images/tgw_chat_config_example.png)
+
+The assistant keeps API keys/tokens/secrets local (only masked summaries are sent to LLM providers) and guides you with concrete commands such as:
+
+```bash
+export TOKLIGENCE_OPENAI_API_KEY=sk-...
+tgw config set work_mode translation
+```
+
 ## Real-World Use Cases
 
 ### 1. Use Claude with Codex CLI

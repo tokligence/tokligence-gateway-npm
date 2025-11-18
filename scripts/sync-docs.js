@@ -81,7 +81,8 @@ function syncDocs() {
 
     // Core configuration and usage guides
     'docs/QUICK_START.md',
-    'docs/USER_GUIDE.md'
+    'docs/USER_GUIDE.md',
+    'docs/configuration_guide.md'
   ];
 
   const syncedFiles = [];
