@@ -70,12 +70,18 @@ function syncDocs() {
   }
 
   // Files to sync (relative to Go repo root)
+  //
+  // NOTE:
+  // The Go repo currently uses UPPER_SNAKE_CASE for several
+  // key docs (e.g. QUICK_START.md, USER_GUIDE.md). We sync
+  // those directly instead of non‑existent camel‑case files.
   const filesToSync = [
+    // Top‑level overview
     'README.md',
-    'docs/configuration.md',
-    'docs/troubleshooting.md',
-    'docs/quick-start.md',
-    'docs/architecture.md'
+
+    // Core configuration and usage guides
+    'docs/QUICK_START.md',
+    'docs/USER_GUIDE.md'
   ];
 
   const syncedFiles = [];
