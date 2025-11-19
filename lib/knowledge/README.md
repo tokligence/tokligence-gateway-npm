@@ -65,6 +65,31 @@ Tokligence Gateway is a **platform-independent** LLM gateway that provides **dua
 4. **Intelligent Work Modes**: Auto, passthrough, or translation modes for flexible request handling
 5. **Token Trading**: Optional two-way token trading capabilities
 
+## ⚡ Performance
+
+Tokligence Gateway delivers exceptional performance with minimal resource footprint.
+
+### Benchmark Results vs LiteLLM
+
+Based on [LiteLLM's official benchmarks](https://docs.litellm.ai/docs/benchmarks) (4 CPU, 8GB RAM, loopback testing):
+
+| Metric | LiteLLM<br/>(4 instances) | Tokligence<br/>(1 instance) | Improvement |
+|--------|---------------------------|----------------------------|-------------|
+| **Throughput** | 1,170 RPS | **7,700+ RPS** | **6.6x faster** ✨ |
+| **Median Latency** | 100 ms | 3 ms | **33x faster** ⚡ |
+| **P95 Latency** | 150 ms | 10-32 ms | **5-15x faster** 🚀 |
+| **P99 Latency** | 240 ms | 150 ms | **1.6x faster** |
+| **Instances Needed** | 4 | **1** | **75% fewer** 💰 |
+| **Error Rate @ Peak** | N/A | **0%** | Excellent stability |
+
+**Key Highlights**:
+- **6.6x higher throughput** with single instance vs LiteLLM's 4 instances
+- **Sub-millisecond minimum latency** (0.18ms) for simple requests
+- **Zero errors** at maximum throughput (7,700 RPS)
+- **Performance lower bound**: Tested on development machine (AMD Ryzen 9 3950X) with concurrent workloads—production environments may see even higher performance
+
+See [scripts/benchmark/](scripts/benchmark/) for complete methodology and reproduction steps.
+
 ### Core Feature Comparison
 
 | Feature | Tokligence Gateway | LiteLLM | OpenRouter | Cloudflare AI Gateway | AWS Bedrock |
@@ -150,14 +175,17 @@ All variants are powered by the same Go codebase, ensuring consistent performanc
 
 ## Main Features
 
+- **Multi-Provider Support**: OpenAI, Anthropic, and Google Gemini with unified gateway interface
 - **Dual Protocol Support**: OpenAI‑compatible and Anthropic‑native APIs running simultaneously
 - **Full Tool Calling Support**: Complete OpenAI function calling with automatic Anthropic tools conversion
 - **Intelligent Duplicate Detection**: Prevents infinite loops by detecting repeated tool calls
 - **Codex CLI Integration**: Full support for OpenAI Codex v0.55.0+ with Responses API and tool calling
+- **Gemini Pass-through Proxy**: Native Google Gemini API support with both native and OpenAI-compatible endpoints
 - **Flexible Work Modes**: Three operation modes - `auto` (smart routing), `passthrough` (delegation-only), `translation` (translation-only)
 - **Multi-Port Architecture**: Default facade port 8081 with optional multi-port mode for strict endpoint isolation
 - **OpenAI‑compatible chat + embeddings** (SSE and non‑SSE)
 - **Anthropic‑native `/v1/messages`** with correct SSE envelope (works with Claude Code)
+- **Gemini‑native `/v1beta/models/*` endpoints** with SSE streaming support
 - **In‑process translation** (Anthropic ↔ OpenAI) with robust streaming and tool calling
 - **Rotating logs** (daily + size), separate CLI/daemon outputs
 - **Dev‑friendly auth toggle** and sensible defaults
@@ -169,8 +197,9 @@ Full details → see [docs/features.md](docs/features.md)
 
 - **OpenAI Codex → Anthropic Claude**: Point Codex to `http://localhost:8081/v1` (OpenAI-compatible). The gateway translates Chat Completions and Responses API requests to Anthropic, handles tool calling, and prevents infinite loops. Full support for Codex CLI v0.55.0+ including streaming, tools, and automatic duplicate detection. See [docs/codex-to-anthropic.md](docs/codex-to-anthropic.md).
 - **Claude Code integration**: Point Claude Code to `http://localhost:8081/anthropic/v1/messages` (SSE). The gateway translates to OpenAI upstream and streams Anthropic‑style SSE back. Set `TOKLIGENCE_OPENAI_API_KEY` and you're ready. See [docs/claude_code-to-openai.md](docs/claude_code-to-openai.md).
+- **Google Gemini integration**: Point your application to `http://localhost:8084/v1beta` for native Gemini API access or use the OpenAI-compatible endpoint at `http://localhost:8084/v1beta/openai/chat/completions`. The gateway provides pass-through proxy support for both Gemini native and OpenAI-compatible formats with SSE streaming. See [docs/gemini-integration.md](docs/gemini-integration.md).
 - **Drop‑in OpenAI proxy**: Change your SDK base URL to the gateway `/v1` endpoints to get central logging, usage accounting, and routing without changing your app code.
-- **Multi‑provider switching**: Route `claude*` to Anthropic and `gpt-*` to OpenAI with a config change; switch providers without touching your agent code.
+- **Multi‑provider switching**: Route `claude*` to Anthropic, `gpt-*` to OpenAI, and `gemini-*` to Google Gemini with a config change; switch providers without touching your agent code.
 - **Team gateway**: Run `gatewayd` for your team with API keys, a per‑user ledger, and small CPU/RAM footprint.
 - **Local dev/offline**: Use the built‑in `loopback` model and SQLite to develop/test SSE flows without calling external LLMs.
 
@@ -265,13 +294,15 @@ The gateway exposes **both OpenAI and Anthropic API formats** simultaneously, wi
 | `admin_port` | Admin-only endpoints | `:8079` |
 | `openai_port` | OpenAI-only endpoints | `:8082` |
 | `anthropic_port` | Anthropic-only endpoints | `:8083` |
-| `facade_endpoints`, `openai_endpoints`, `anthropic_endpoints`, `admin_endpoints` | Comma-separated endpoint keys per port | defaults in `internal/httpserver/server.go` |
+| `gemini_port` | Gemini-only endpoints | `:8084` |
+| `facade_endpoints`, `openai_endpoints`, `anthropic_endpoints`, `gemini_endpoints`, `admin_endpoints` | Comma-separated endpoint keys per port | defaults in `internal/httpserver/server.go` |
 
 Endpoint keys map to concrete routes:
 
 - `openai_core`: `/v1/chat/completions`, `/v1/embeddings`, `/v1/models`
 - `openai_responses`: `/v1/responses`
 - `anthropic`: `/anthropic/v1/messages`, `/v1/messages`, and their `count_tokens` variants
+- `gemini_native`: `/v1beta/models/*` (native Gemini API and OpenAI-compatible endpoints)
 - `admin`: `/api/v1/admin/...`
 - `health`: `/health`
 
@@ -283,9 +314,11 @@ facade_port = :8081
 admin_port = :8079
 openai_port = :8082
 anthropic_port = :8083
+gemini_port = :8084
 
 openai_endpoints = openai_core,openai_responses,health
 anthropic_endpoints = anthropic,health
+gemini_endpoints = gemini_native,health
 admin_endpoints = admin,health
 ```
 
@@ -301,6 +334,11 @@ The regression suite (`go test ./...` and `tests/run_all_tests.sh`) now exercise
 | `POST /v1/embeddings` | OpenAI | Text embeddings | LangChain, OpenAI SDK |
 | `POST /anthropic/v1/messages` | Anthropic | Native Anthropic chat | Claude Code |
 | `POST /anthropic/v1/messages/count_tokens` | Anthropic | Token estimation | Claude Code |
+| `POST /v1beta/models/{model}:generateContent` | Gemini | Native Gemini chat completion | Google AI SDK |
+| `POST /v1beta/models/{model}:streamGenerateContent` | Gemini | Native Gemini streaming | Google AI SDK |
+| `POST /v1beta/models/{model}:countTokens` | Gemini | Token counting | Google AI SDK |
+| `GET /v1beta/models` | Gemini | List Gemini models | Google AI SDK |
+| `POST /v1beta/openai/chat/completions` | Gemini (OpenAI-compatible) | OpenAI-format on Gemini | OpenAI SDK with Gemini models |
 
 ### Routing Mechanism
 
@@ -422,6 +460,7 @@ For detailed setup instructions, see [docs/codex-to-anthropic.md](docs/codex-to-
 - Integration guides:
    - Codex → Anthropic via Gateway: [docs/codex-to-anthropic.md](docs/codex-to-anthropic.md)
    - Claude Code → OpenAI via Gateway: [docs/claude_code-to-openai.md](docs/claude_code-to-openai.md)
+   - Google Gemini Integration: [docs/gemini-integration.md](docs/gemini-integration.md)
 
 ## License
 

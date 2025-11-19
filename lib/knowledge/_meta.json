@@ -1,12 +1,12 @@
 {
-  "version": "unknown",
-  "commit": "unknown",
-  "syncedAt": "2025-11-18T01:36:42.960Z",
+  "version": "0.3.3",
+  "commit": "e7d1b304",
+  "syncedAt": "2025-11-19T07:46:55.774Z",
   "files": {
-    "README.md": "885690e0330bd5d343c7975debd18302",
+    "README.md": "28914a3e7a91d4be38a9f3b79c8a4e1b",
     "QUICK_START.md": "9bd740a5d5bae2af1acaa258d42505df",
     "USER_GUIDE.md": "7ea2efd2b1a2b24b407ad07f30dd5e3c",
-    "configuration_guide.md": "562a702f1a0a9fd7aac5b5372b96cc45"
+    "configuration_guide.md": "116591dfc473b99faa34746e49160b17"
   },
   "links": {
     "github": "https://github.com/tokligence/tokligence-gateway",
