@@ -88,10 +88,27 @@ jobs:
           npm ci
           npm test
 
-      - name: Skip sync-docs in CI (already has synced docs)
+      - name: Clone Go repository for doc sync
         if: steps.check.outputs.has_update == 'true'
         run: |
-          # Remove prepublishOnly script temporarily to skip sync-docs
+          # Clone the Go repository to sync documentation
+          git clone --depth 1 --branch v${{ steps.check.outputs.new_version }} \
+            https://github.com/tokligence/tokligence-gateway.git \
+            ../tokligence-gateway
+
+      - name: Sync documentation from Go repo
+        if: steps.check.outputs.has_update == 'true'
+        run: |
+          # Run sync-docs to get latest documentation
+          npm run sync-docs
+
+          # Stage documentation changes
+          git add lib/knowledge/
+
+      - name: Skip prepublishOnly hook in CI
+        if: steps.check.outputs.has_update == 'true'
+        run: |
+          # Remove prepublishOnly script temporarily to avoid double sync
           node -e "
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
@@ -111,8 +128,21 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
-          git add package.json
-          git commit -m "chore: sync with gateway release v${{ steps.check.outputs.new_version }}"
+          # Check if there are changes to commit
+          if git diff --cached --quiet; then
+            echo "No documentation changes to commit"
+            git add package.json
+            git commit -m "chore: sync with gateway release v${{ steps.check.outputs.new_version }}"
+          else
+            echo "Committing package.json and documentation changes"
+            git add package.json
+            git commit -m "chore: sync with gateway release v${{ steps.check.outputs.new_version }}
+
+- Updated package version to ${{ steps.check.outputs.new_version }}
+- Synced documentation from gateway repo
+- Updated knowledge base for tgw chat assistant"
+          fi
+
           git push
 
       - name: Create GitHub Release
