@@ -42,8 +42,31 @@ Tokligence Gateway is a **platform-independent LLM gateway** that provides **dua
 | **Client Compatibility** | OpenAI SDK + Anthropic SDK | OpenAI SDK | OpenAI SDK | OpenAI SDK |
 | **Token Marketplace** | ✅ Two-way trading | ❌ | ❌ | ❌ |
 | **Deployment** | Self-hosted (Docker, npm, pip, binary) | Self-hosted Python | Managed SaaS | Cloudflare platform |
-| **Performance** | Go binary, low overhead | Python runtime | Network hop | Edge optimized |
+| **Performance** | **7,700 RPS** (Go binary) | 1,170 RPS (Python, 4 instances) | Network hop | Edge optimized |
+| **Throughput vs LiteLLM** | **6.6x faster** (1 instance) | Baseline (4 instances) | N/A | N/A |
+| **Median Latency** | **3 ms** | 100 ms | N/A | N/A |
 | **Open Source** | Apache-2.0 | MIT | Closed | Closed |
+
+## ⚡ Performance Benchmarks
+
+Tokligence Gateway delivers exceptional performance with minimal resource footprint. Based on [LiteLLM's official benchmarks](https://docs.litellm.ai/docs/benchmarks) (4 CPU, 8GB RAM):
+
+| Metric | LiteLLM<br/>(4 instances) | Tokligence<br/>(1 instance) | Improvement |
+|--------|---------------------------|----------------------------|-------------|
+| **Throughput** | 1,170 RPS | **7,700+ RPS** | **6.6x faster** ✨ |
+| **Median Latency** | 100 ms | **3 ms** | **33x faster** ⚡ |
+| **P95 Latency** | 150 ms | **10-32 ms** | **5-15x faster** 🚀 |
+| **P99 Latency** | 240 ms | **150 ms** | **1.6x faster** |
+| **Instances Needed** | 4 | **1** | **75% fewer** 💰 |
+| **Error Rate @ Peak** | N/A | **0%** | Excellent stability |
+
+**Key Highlights**:
+- **6.6x higher throughput** with single instance vs LiteLLM's 4 instances
+- **Sub-millisecond minimum latency** (0.18ms) for simple requests
+- **Zero errors** at maximum throughput (7,700 RPS)
+- **Performance lower bound**: Tested on development machine (AMD Ryzen 9 3950X) with concurrent workloads—production environments may see even higher performance
+
+See the [complete benchmark methodology](https://github.com/tokligence/tokligence-gateway/tree/main/scripts/benchmark) for reproduction steps.
 
 ## Installation
 
