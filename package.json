@@ -1,6 +1,6 @@
 {
   "name": "@tokligence/gateway",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Multi-provider LLM Gateway - Unified API for OpenAI, Anthropic, Google AI and more",
   "main": "lib/index.js",
   "bin": {
