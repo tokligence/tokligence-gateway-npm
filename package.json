@@ -65,7 +65,7 @@
     "prettier": "^3.0.0"
   },
   "tokligenceGateway": {
-    "version": "0.3.1",
+    "version": "0.3.3",
     "buildSuffix": "",
     "binaryName": "gateway",
     "daemonBinaryName": "gatewayd",
