@@ -136,11 +136,10 @@ jobs:
           else
             echo "Committing package.json and documentation changes"
             git add package.json
-            git commit -m "chore: sync with gateway release v${{ steps.check.outputs.new_version }}
-
-- Updated package version to ${{ steps.check.outputs.new_version }}
-- Synced documentation from gateway repo
-- Updated knowledge base for tgw chat assistant"
+            git commit -m "chore: sync with gateway release v${{ steps.check.outputs.new_version }}" \
+              -m "- Updated package version to ${{ steps.check.outputs.new_version }}" \
+              -m "- Synced documentation from gateway repo" \
+              -m "- Updated knowledge base for tgw chat assistant"
           fi
 
           git push
