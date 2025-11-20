@@ -4,11 +4,6 @@ on:
   schedule:
     # Check for new releases every hour
     - cron: '0 * * * *'
-  push:
-    branches:
-      - master
-    paths:
-      - '.github/workflows/sync-release.yml'
   workflow_dispatch:
     inputs:
       version:
