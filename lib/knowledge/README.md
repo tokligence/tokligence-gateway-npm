@@ -92,12 +92,6 @@ Based on [LiteLLM's official benchmarks](https://docs.litellm.ai/docs/benchmarks
 - **1/4 infrastructure cost** (1 instance vs 4 instances)
 - **9.6x higher throughput** with 75% fewer resources
 
-**Gateway Optimizations** (v0.3.4):
-- Batch Size: 5,000 entries (was: 100)
-- Flush Interval: 200ms (was: 1000ms)
-- Buffer Size: 500,000 entries (was: 10,000)
-- Workers: 20 goroutines (was: 1)
-
 See [scripts/benchmark/](scripts/benchmark/) for complete methodology, detailed results, and reproduction steps.
 
 ### Core Feature Comparison
@@ -187,7 +181,10 @@ All variants are powered by the same Go codebase, ensuring consistent performanc
 
 - **Multi-Provider Support**: OpenAI, Anthropic, and Google Gemini with unified gateway interface
 - **Dual Protocol Support**: OpenAI‑compatible and Anthropic‑native APIs running simultaneously
-- **Full Tool Calling Support**: Complete OpenAI function calling with automatic Anthropic tools conversion
+- **Prompt Firewall**: Real-time PII detection and redaction with configurable modes (monitor, enforce, redact) - protect sensitive data in prompts and responses
+- **Advanced Tool Calling**: Complete OpenAI function calling with automatic Anthropic tools conversion, MCP server support, and computer use tools
+- **Prompt Caching**: Request-side cache control for cost optimization with Anthropic's prompt caching
+- **Code Execution**: Multi-type content blocks supporting text, images, and container uploads for code execution scenarios
 - **Intelligent Duplicate Detection**: Prevents infinite loops by detecting repeated tool calls
 - **Codex CLI Integration**: Full support for OpenAI Codex v0.55.0+ with Responses API and tool calling
 - **Gemini Pass-through Proxy**: Native Google Gemini API support with both native and OpenAI-compatible endpoints
@@ -471,6 +468,7 @@ For detailed setup instructions, see [docs/codex-to-anthropic.md](docs/codex-to-
    - Codex → Anthropic via Gateway: [docs/codex-to-anthropic.md](docs/codex-to-anthropic.md)
    - Claude Code → OpenAI via Gateway: [docs/claude_code-to-openai.md](docs/claude_code-to-openai.md)
    - Google Gemini Integration: [docs/gemini-integration.md](docs/gemini-integration.md)
+   - Prompt Firewall: [docs/PROMPT_FIREWALL.md](docs/PROMPT_FIREWALL.md) | [Quick Start](examples/firewall/README.md)
 
 ## License
 
