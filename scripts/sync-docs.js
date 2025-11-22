@@ -82,7 +82,12 @@ function syncDocs() {
     // Core configuration and usage guides
     'docs/QUICK_START.md',
     'docs/USER_GUIDE.md',
-    'docs/configuration_guide.md'
+    'docs/configuration_guide.md',
+
+    // Prompt Firewall documentation
+    'docs/PROMPT_FIREWALL.md',
+    'docs/FIREWALL_REDACT_MODE.md',
+    'docs/PII_ENTITIES_REFERENCE.md'
   ];
 
   const syncedFiles = [];
