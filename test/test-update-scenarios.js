@@ -6,13 +6,19 @@
 
 const fs = require('fs');
 const path = require('path');
-const { checkForUpdates, compareVersions } = require('../lib/update-checker');
 const chalk = require('chalk');
 const os = require('os');
 
-const CONFIG_DIR = path.join(os.homedir(), '.tokligence');
+// Use temp config directory to avoid touching real ~/.tokligence during tests
+const tempConfigDir = fs.mkdtempSync(path.join(os.tmpdir(), 'toklicfg-'));
+process.env.TOKLIGENCE_CONFIG_DIR = tempConfigDir;
+
+const { checkForUpdates, compareVersions } = require('../lib/update-checker');
+
+const CONFIG_DIR = process.env.TOKLIGENCE_CONFIG_DIR || path.join(os.homedir(), '.tokligence');
 const UPDATE_CONFIG_FILE = path.join(CONFIG_DIR, 'update-config.json');
 const BACKUP_FILE = UPDATE_CONFIG_FILE + '.backup';
+const fakeLatestVersion = (version) => async () => version;
 
 function backupConfig() {
   if (fs.existsSync(UPDATE_CONFIG_FILE)) {
@@ -68,7 +74,11 @@ async function main() {
       },
       async () => {
         console.log(chalk.gray('  Testing with current version 0.3.4...'));
-        await checkForUpdates('0.3.4', '@tokligence/gateway', { force: true, silent: true });
+        await checkForUpdates('0.3.4', '@tokligence/gateway', {
+          force: true,
+          silent: true,
+          fetchLatestVersion: fakeLatestVersion('0.3.4')
+        });
         console.log(chalk.gray('  No update prompt shown (expected)'));
       }
     );
@@ -82,10 +92,14 @@ async function main() {
       },
       async () => {
         console.log(chalk.gray('  Testing with old version 0.1.0...'));
-        console.log(chalk.yellow('  Update prompt should appear (responding with N automatically)'));
+        console.log(chalk.yellow('  Silent update notice should appear (no prompt)'));
 
-        // This will show the update prompt
-        const promise = checkForUpdates('0.1.0', '@tokligence/gateway', { force: true, silent: true });
+        // This will show the update notice silently
+        const promise = checkForUpdates('0.1.0', '@tokligence/gateway', {
+          force: true,
+          silent: true,
+          fetchLatestVersion: fakeLatestVersion('0.3.5')
+        });
         await promise;
       }
     );
@@ -102,7 +116,11 @@ async function main() {
       },
       async () => {
         console.log(chalk.gray('  Testing with version 0.1.0 (0.3.4 is skipped)...'));
-        await checkForUpdates('0.1.0', '@tokligence/gateway', { force: true, silent: true });
+        await checkForUpdates('0.1.0', '@tokligence/gateway', {
+          force: true,
+          silent: true,
+          fetchLatestVersion: fakeLatestVersion('0.3.4')
+        });
         console.log(chalk.gray('  No prompt shown because 0.3.4 is in skip list'));
       }
     );
@@ -119,7 +137,11 @@ async function main() {
       },
       async () => {
         console.log(chalk.gray('  Testing without force flag...'));
-        await checkForUpdates('0.1.0', '@tokligence/gateway', { force: false, silent: true });
+        await checkForUpdates('0.1.0', '@tokligence/gateway', {
+          force: false,
+          silent: true,
+          fetchLatestVersion: fakeLatestVersion('0.3.5')
+        });
         console.log(chalk.gray('  No check performed (too recent)'));
       }
     );
@@ -136,7 +158,11 @@ async function main() {
       },
       async () => {
         console.log(chalk.gray('  Testing with force=true flag...'));
-        await checkForUpdates('0.1.0', '@tokligence/gateway', { force: true, silent: true });
+        await checkForUpdates('0.1.0', '@tokligence/gateway', {
+          force: true,
+          silent: true,
+          fetchLatestVersion: fakeLatestVersion('0.3.5')
+        });
         console.log(chalk.gray('  Update check performed despite recent check'));
       }
     );

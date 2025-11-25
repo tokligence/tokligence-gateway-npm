@@ -4,7 +4,15 @@
  * Test script for update checker functionality
  */
 
-const { checkForUpdates, getLatestVersion, compareVersions } = require('../lib/update-checker');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
+// Use temp config directory to avoid touching real ~/.tokligence during tests
+const tempConfigDir = fs.mkdtempSync(path.join(os.tmpdir(), 'toklicfg-'));
+process.env.TOKLIGENCE_CONFIG_DIR = tempConfigDir;
+
+const updateChecker = require('../lib/update-checker');
 const chalk = require('chalk');
 
 async function testUpdateChecker() {
@@ -22,7 +30,7 @@ async function testUpdateChecker() {
 
   let passed = 0;
   for (const test of tests) {
-    const result = compareVersions(test.v1, test.v2);
+    const result = updateChecker.compareVersions(test.v1, test.v2);
     if (result === test.expected) {
       console.log(chalk.green('  ✓'), test.desc);
       passed++;
@@ -32,24 +40,17 @@ async function testUpdateChecker() {
   }
   console.log(chalk.gray(`  ${passed}/${tests.length} tests passed\n`));
 
-  // Test 2: Get latest version from npm
-  console.log(chalk.cyan('Test 2: Fetch latest version from npm registry'));
+  // Test 2: Stubbed update check (no network, no prompt)
+  console.log(chalk.cyan('Test 2: Stubbed update check (silent)'));
   try {
-    const latestVersion = await getLatestVersion('@tokligence/gateway');
-    console.log(chalk.green('  ✓'), `Latest version: ${latestVersion}\n`);
+    await updateChecker.checkForUpdates('0.1.0', '@tokligence/gateway', {
+      force: true,
+      silent: true,
+      fetchLatestVersion: async () => '9.9.9'
+    });
+    console.log(chalk.green('  ✓ Update check completed without network\n'));
   } catch (error) {
-    console.log(chalk.red('  ✗'), `Failed to fetch: ${error.message}\n`);
-  }
-
-  // Test 3: Full update check (simulated with older version)
-  console.log(chalk.cyan('Test 3: Simulated update check (using version 0.1.0)'));
-  console.log(chalk.gray('  This will prompt you for update decision...\n'));
-
-  try {
-    await checkForUpdates('0.1.0', '@tokligence/gateway', { force: true });
-    console.log(chalk.green('\n  ✓ Update check completed\n'));
-  } catch (error) {
-    console.log(chalk.red('\n  ✗ Update check failed:', error.message, '\n'));
+    console.log(chalk.red('  ✗ Update check failed:', error.message, '\n'));
   }
 
   console.log(chalk.bold('=== Tests Complete ===\n'));
