@@ -5,9 +5,29 @@ const chalk = require('chalk');
 const ora = require('ora');
 const { Gateway } = require('../lib');
 const pkg = require('../package.json');
+const { checkForUpdates } = require('../lib/update-checker');
 
 const path = require('path');
 const scriptName = path.basename(process.argv[1], '.js');
+const isInteractiveShell = Boolean(process.stdin.isTTY && process.stdout.isTTY && !process.env.CI);
+
+// Check for updates in background (non-blocking)
+// Only check when running actual commands, not for --help or --version
+const shouldCheckUpdate = process.argv.length > 2 &&
+  !process.argv.includes('--help') &&
+  !process.argv.includes('-h') &&
+  !process.argv.includes('--version') &&
+  !process.argv.includes('-V') &&
+  isInteractiveShell;
+
+if (shouldCheckUpdate) {
+  // Run update check asynchronously without blocking
+  setImmediate(() => {
+    checkForUpdates(pkg.version, pkg.name, { silent: false }).catch(() => {
+      // Silently ignore errors
+    });
+  });
+}
 
 program
   .name(scriptName === 'tgw' ? 'tgw' : 'tokligence')
