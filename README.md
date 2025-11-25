@@ -6,13 +6,55 @@
 
 **NPM installation for [Tokligence Gateway](https://github.com/tokligence/tokligence-gateway)** - The first open-source AI gateway with two-way token trading.
 
-> **TL;DR**: Tokligence Gateway is a high-performance LLM gateway that provides unified access to multiple LLM providers (OpenAI, Anthropic, Google AI) with full bidirectional protocol translation. This NPM package automatically downloads and manages the native Go binaries for your platform.
+> **TL;DR**: Tokligence Gateway is a high-performance LLM gateway that protects your AI agents from data leaks, enables elastic token capacity through marketplace trading, and provides unified multi-provider access. The trusted infrastructure layer for the AI-native enterprise.
+
+## 🌐 Vision
+
+**Three pillars for the AI-native era:**
+
+### 🛡️ The Trusted Partner for Coding Agents
+
+Your AI agents handle sensitive code, secrets, and business data. Tokligence protects them:
+
+- **PII Prompt Firewall** - Real-time detection and redaction of sensitive data across 100+ languages
+- **API Key Protection** - Detects 30+ provider keys (OpenAI, AWS, GitHub, Stripe, etc.) before they leak to LLM providers
+- **Multiple Modes** - Monitor, enforce, or redact based on your compliance needs
+- **Seamless Integration** - Works with Codex CLI, Claude Code, and any OpenAI/Anthropic-compatible agent
+
+### 🧽 The "Sponge" for SME AI Token Capacity
+
+Think of Tokligence as a buffer for your AI throughput - smoothing capacity like a sponge absorbs water:
+
+- **Peak Hours** - Buy tokens from the marketplace when internal LLM capacity is maxed out
+- **Off-Peak** - Sell your unused LLM throughput to earn revenue
+- **Elastic Scaling** - No need to over-provision; scale with actual demand
+
+### 🔧 Next-Gen AI Token Pipeline Infrastructure
+
+Not just another gateway - the foundation for AI token economics:
+
+- **Unified Access** - OpenAI, Anthropic, Gemini with bidirectional protocol translation
+- **Token Ledger** - Built-in accounting and audit trail for every token consumed or sold
+- **Open Source** - Apache 2.0, self-hosted, no vendor lock-in
+- **High Performance** - 9.6x faster than LiteLLM with 75% less infrastructure
+
+---
 
 ## What is Tokligence Gateway?
 
 Tokligence Gateway is a **platform-independent LLM gateway** that provides **dual native API support** - both OpenAI and Anthropic protocols - with full bidirectional translation. Unlike simple proxies, it offers:
 
 ### Core Capabilities
+
+- **🛡️ PII Prompt Firewall**: Real-time detection and redaction of sensitive data
+  - Detects PII across **100+ languages** (3-5ms latency, CPU-only)
+  - **API Key Detection** for 30+ providers (OpenAI, AWS, GitHub, Stripe, etc.)
+  - Three modes: Monitor, Enforce, or Redact based on compliance needs
+  - Built-in regex filters + optional Presidio sidecar for NLP-based detection
+
+![PII Prompt Firewall - Redact Mode](data/images/firewall_compressed.png)
+
+*PII Prompt Firewall in Redact Mode — automatically detects and masks sensitive information before sending to LLM providers.*
 
 - **🔄 Bidirectional Protocol Translation**: OpenAI ↔ Anthropic with zero adapter overhead
   - Use Claude models with OpenAI SDK (Codex CLI, LangChain)
@@ -37,34 +79,39 @@ Tokligence Gateway is a **platform-independent LLM gateway** that provides **dua
 
 | Feature | Tokligence Gateway | LiteLLM | OpenRouter | Cloudflare AI Gateway |
 |---------|-------------------|---------|------------|----------------------|
+| **PII Prompt Firewall** | ✅ 100+ languages, API key detection | ❌ | ❌ | ❌ |
 | **Bidirectional Translation** | OpenAI ↔ Anthropic | OpenAI-style only | OpenAI-style only | OpenAI-style only |
 | **Native Protocols** | Dual native APIs | Single proxy | Single endpoint | Normalizes to OpenAI |
 | **Client Compatibility** | OpenAI SDK + Anthropic SDK | OpenAI SDK | OpenAI SDK | OpenAI SDK |
 | **Token Marketplace** | ✅ Two-way trading | ❌ | ❌ | ❌ |
 | **Deployment** | Self-hosted (Docker, npm, pip, binary) | Self-hosted Python | Managed SaaS | Cloudflare platform |
-| **Performance** | **7,700 RPS** (Go binary) | 1,170 RPS (Python, 4 instances) | Network hop | Edge optimized |
-| **Throughput vs LiteLLM** | **6.6x faster** (1 instance) | Baseline (4 instances) | N/A | N/A |
-| **Median Latency** | **3 ms** | 100 ms | N/A | N/A |
+| **Performance** | **11,227 RPS** (Go binary) | 1,170 RPS (Python, 4 instances) | Network hop | Edge optimized |
+| **Throughput vs LiteLLM** | **9.6x faster** (1 instance) | Baseline (4 instances) | N/A | N/A |
+| **P50 Latency** | **49.66 ms** | 100 ms | N/A | N/A |
 | **Open Source** | Apache-2.0 | MIT | Closed | Closed |
 
 ## ⚡ Performance Benchmarks
 
-Tokligence Gateway delivers exceptional performance with minimal resource footprint. Based on [LiteLLM's official benchmarks](https://docs.litellm.ai/docs/benchmarks) (4 CPU, 8GB RAM):
+Tokligence Gateway delivers exceptional performance with minimal resource footprint. Based on [LiteLLM's official benchmarks](https://docs.litellm.ai/docs/benchmarks) running on 4 CPU, 8GB RAM:
 
-| Metric | LiteLLM<br/>(4 instances) | Tokligence<br/>(1 instance) | Improvement |
-|--------|---------------------------|----------------------------|-------------|
-| **Throughput** | 1,170 RPS | **7,700+ RPS** | **6.6x faster** ✨ |
-| **Median Latency** | 100 ms | **3 ms** | **33x faster** ⚡ |
-| **P95 Latency** | 150 ms | **10-32 ms** | **5-15x faster** 🚀 |
-| **P99 Latency** | 240 ms | **150 ms** | **1.6x faster** |
-| **Instances Needed** | 4 | **1** | **75% fewer** 💰 |
-| **Error Rate @ Peak** | N/A | **0%** | Excellent stability |
+| Metric | LiteLLM<br/>(4 instances) | Tokligence v0.3.4<br/>(1 instance) | Improvement |
+|--------|---------------------------|-----------------------------------|-------------|
+| **Throughput** | 1,170 RPS | **11,227 RPS** | **9.6x faster** ✨ |
+| **P50 Latency** | 100 ms | **49.66 ms** | **2x faster** ⚡ |
+| **P95 Latency** | 150 ms | **78.63 ms** | **1.9x faster** 🚀 |
+| **P99 Latency** | 240 ms | **93.81 ms** | **2.6x faster** |
+| **Infrastructure** | 4 instances | **1 instance** | **75% reduction** 💰 |
+| **Error Rate** | N/A | **0%** | Perfect stability |
 
-**Key Highlights**:
-- **6.6x higher throughput** with single instance vs LiteLLM's 4 instances
-- **Sub-millisecond minimum latency** (0.18ms) for simple requests
-- **Zero errors** at maximum throughput (7,700 RPS)
-- **Performance lower bound**: Tested on development machine (AMD Ryzen 9 3950X) with concurrent workloads—production environments may see even higher performance
+**Peak Performance** (100 concurrent):
+- **12,908 RPS** - absolute maximum throughput
+- **P50: 7.75ms, P95: 16.47ms, P99: 21.15ms** - sub-100ms latencies
+- **774,571 requests in 60 seconds** with 0% errors
+
+**Cost Efficiency**:
+- **38.4x better performance per dollar** than LiteLLM
+- **1/4 infrastructure cost** (1 instance vs 4 instances)
+- **9.6x higher throughput** with 75% fewer resources
 
 See the [complete benchmark methodology](https://github.com/tokligence/tokligence-gateway/tree/main/scripts/benchmark) for reproduction steps.
 
@@ -498,6 +545,7 @@ npm test
 
 - **Main Repository**: [tokligence/tokligence-gateway](https://github.com/tokligence/tokligence-gateway)
 - **Quick Start Guide**: [docs/QUICK_START.md](https://github.com/tokligence/tokligence-gateway/blob/main/docs/QUICK_START.md)
+- **Prompt Firewall**: [docs/PROMPT_FIREWALL.md](https://github.com/tokligence/tokligence-gateway/blob/main/docs/PROMPT_FIREWALL.md) | [Quick Start](https://github.com/tokligence/tokligence-gateway/tree/main/examples/firewall)
 - **Codex Integration**: [docs/codex-to-anthropic.md](https://github.com/tokligence/tokligence-gateway/blob/main/docs/codex-to-anthropic.md)
 - **Claude Code Integration**: [docs/claude_code-to-openai.md](https://github.com/tokligence/tokligence-gateway/blob/main/docs/claude_code-to-openai.md)
 - **Features Documentation**: [docs/features.md](https://github.com/tokligence/tokligence-gateway/blob/main/docs/features.md)
